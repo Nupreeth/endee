@@ -23,8 +23,17 @@ Given a rental agreement, find the clauses that best answer a user's query (e.g.
    - Query Endee with optional filters.
    - Return top matches with metadata.
 
+```mermaid
+flowchart LR
+    U[User Query] --> S[SafetyAgent]
+    S --> R[RetrievalAgent]
+    R --> E[(Endee Vector DB)]
+    E --> G[ReasoningAgent]
+    G --> O[Response]
+```
+
 ## Multi-Agent Flow
-The system uses a lightweight multi-agent pipeline:
+The system uses a simple multi-agent pipeline:
 - `SafetyAgent` validates the query.
 - `RetrievalAgent` fetches top-k clauses from Endee.
 - `ReasoningAgent` composes a concise answer with evidence.
@@ -123,16 +132,28 @@ python agents/orchestrator.py
 ```
 
 ## Screenshot
-Add a screenshot of the CLI or API response for quick validation.
+Add a screenshot of the CLI or API response.
 Recommended path: `docs/screenshot.png` (place the file there).
 
 ![Covenix Screenshot](docs/screenshot.png)
+
+## Results
+Example output using the bundled sample data:
+
+Query:
+```
+security deposit
+```
+
+Top matches (truncated):
+1. `deposit` — "A security deposit equivalent to two months of rent is due at signing..."
+2. `deposit` — "If the tenant vacates early, the security deposit may be adjusted..."
 
 ## Configuration
 Optional environment variables:
 - `ENDEE_AUTH_TOKEN`: authentication token if enabled on the server.
 - `ENDEE_BASE_URL`: custom base URL (include `/api/v1` if you change the port).
-- `ENDEE_INDEX_NAME`: override the index name (default: `covenix-clauses`).
+- `ENDEE_INDEX_NAME`: override the index name (default: `covenix_clauses`).
 
 ## Notes
 - If you change the dataset and want a clean re-ingest, delete the index in Endee or use a new `ENDEE_INDEX_NAME`.
