@@ -23,6 +23,13 @@ Given a rental agreement, find the clauses that best answer a user's query (e.g.
    - Query Endee with optional filters.
    - Return top matches with metadata.
 
+## Multi-Agent Flow
+The system uses a lightweight multi-agent pipeline:
+- `SafetyAgent` validates the query.
+- `RetrievalAgent` fetches top-k clauses from Endee.
+- `ReasoningAgent` composes a concise answer with evidence.
+- `Orchestrator` coordinates the flow end-to-end.
+
 ## How Endee Is Used
 Endee is the vector database for this project. Each clause is stored as a vector with:
 - `meta`: original text, document name, and `clause_type`.
@@ -108,6 +115,18 @@ Example request:
 ```bash
 curl -X POST http://127.0.0.1:8000/search -H "Content-Type: application/json" -d "{\"query\": \"What is the security deposit?\", \"top_k\": 3}"
 ```
+
+### 6. Optional multi-agent CLI
+
+```bash
+python agents/orchestrator.py
+```
+
+## Screenshot
+Add a screenshot of the CLI or API response for quick validation.
+Recommended path: `docs/screenshot.png` (place the file there).
+
+![Covenix Screenshot](docs/screenshot.png)
 
 ## Configuration
 Optional environment variables:

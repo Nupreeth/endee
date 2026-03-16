@@ -1,24 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from storage.vector_store import VectorStore
+from agents.orchestrator import Orchestrator
 
 
 app = FastAPI(title="Covenix")
-store = VectorStore()
+orchestrator = Orchestrator()
 
 
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 5
-
-
-@app.on_event("startup")
-def warm_start():
-    try:
-        store._get_index()
-    except Exception:
-        store.build_index()
 
 
 @app.get("/health")
@@ -28,5 +20,5 @@ def health():
 
 @app.post("/search")
 def search(req: SearchRequest):
-    results = store.search(req.query, req.top_k)
-    return {"results": results}
+    response = orchestrator.answer(req.query, req.top_k)
+    return response
