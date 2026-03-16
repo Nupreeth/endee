@@ -5,12 +5,17 @@ from typing import List, Dict, Optional, Iterable
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from endee import Endee, Precision
+from endee.schema import VectorItem
+
+
+if not hasattr(VectorItem, "get"):
+    VectorItem.get = lambda self, key, default=None: getattr(self, key, default)
 
 
 CHUNKS_PATH = "data/chunks/clause_chunks.json"
 SAMPLE_PATH = "sample_data/clause_chunks.json"
 
-DEFAULT_INDEX_NAME = "covenix-clauses"
+DEFAULT_INDEX_NAME = "covenix_clauses"
 MAX_UPSERT_BATCH = 1000
 
 
@@ -31,7 +36,8 @@ class VectorStore:
         if base_url:
             self.client.set_base_url(base_url)
 
-        self.index_name = index_name or os.getenv("ENDEE_INDEX_NAME", DEFAULT_INDEX_NAME)
+        raw_name = index_name or os.getenv("ENDEE_INDEX_NAME", DEFAULT_INDEX_NAME)
+        self.index_name = raw_name.replace("-", "_")
         self.index = None
 
     # -----------------------------
@@ -66,11 +72,16 @@ class VectorStore:
         try:
             self.index = self.client.get_index(name=self.index_name)
         except Exception:
+            precision = (
+                getattr(Precision, "INT8D", None)
+                or getattr(Precision, "INT8", None)
+                or Precision.FLOAT32
+            )
             self.client.create_index(
                 name=self.index_name,
                 dimension=dimension,
                 space_type="cosine",
-                precision=Precision.INT8D,
+                precision=precision,
             )
             self.index = self.client.get_index(name=self.index_name)
 
